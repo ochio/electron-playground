@@ -1,22 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <meta
-      http-equiv="X-Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <title>Hello from Electron renderer!</title>
-    
-  </head>
-  <body>
-    <h1>Hello from Electron renderer!</h1>
-    <p id="info"></p>
-  </body>
-  <script src="./renderer.js"></script>
-</html>
+<meta charset="UTF-8" />
+<title>URL 2分割ビューア</title>
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 16px;
+  }
+  #urlForm {
+    display: flex;
+    gap: 8px;
+  }
+  input {
+    flex: 1;
+    padding: 4px 8px;
+    font-size: 1rem;
+  }
+  button {
+    padding: 4px 16px;
+    font-size: 1rem;
+  }
+</style>
+
+<h2>URL を入力してください</h2>
+<form id="urlForm">
+  <input id="urlInput" type="text" placeholder="https://example.com" />
+  <button type="submit">表示</button>
+</form>
+
+<script>
+  const form  = document.getElementById('urlForm');
+  const input = document.getElementById('urlInput');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    window.electronAPI.loadUrl(input.value.trim());
+    input.blur();
+  });
+
+  // ⌘+L ショートカットが届いたら入力フォームを表示＆フォーカス
+  window.electronAPI.onFocusUrlInput(() => {
+    // 非表示にしている場合は表示トグルも可
+    input.value = '';      // 前回の入力を消したい場合
+    input.focus();
+  });
+</script>
