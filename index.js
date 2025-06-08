@@ -30,8 +30,12 @@ function createSplitWindow() {
 
   win.loadFile(path.join(__dirname, 'index.html'));
 
-  leftView  = new WebContentsView({ webPreferences: { nodeIntegration:false, contextIsolation:true } });
-  rightView = new WebContentsView({ webPreferences: { nodeIntegration:false, contextIsolation:true } });
+  leftView  = new WebContentsView({ webPreferences: { nodeIntegration:false, contextIsolation:true, 
+    preload: path.join(__dirname, 'preload.js'),
+   } });
+  rightView = new WebContentsView({ webPreferences: { nodeIntegration:false, contextIsolation:true,
+    preload: path.join(__dirname, 'preload.js'),
+   } });
   win.contentView.addChildView(leftView);
   win.contentView.addChildView(rightView);
 
@@ -53,6 +57,18 @@ ipcMain.handle('load-url', (_evt, rawUrl) => {
 
   leftView?.webContents.loadURL(translatedUrl);
   rightView?.webContents.loadURL(url);
+});
+
+ipcMain.on('scroll-sync', (evt, pos) => {
+  // 送信元の webContents.id で左右を判定
+  const from = evt.sender.id;
+  if (!leftView || !rightView) return;
+
+  const target =
+    from === leftView.webContents.id ? rightView : leftView;
+
+  // 転送
+  target.webContents.send('apply-scroll', pos);
 });
 
 app.whenReady().then(createSplitWindow);
